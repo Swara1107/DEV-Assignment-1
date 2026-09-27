@@ -9,6 +9,13 @@ on:
     branches:
       - main
 
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+
 jobs:
 
   build-and-test:
@@ -20,12 +27,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+
       - name: Check Project Files
         run: |
           echo "Checking College ERP files..."
           test -f index.html
           test -f style.css
           test -f script.js
+
 
       - name: Build Application
         run: |
@@ -35,6 +44,7 @@ jobs:
           cp style.css build/
           cp script.js build/
 
+
       - name: Test Application
         run: |
           echo "Running tests..."
@@ -43,14 +53,39 @@ jobs:
           test -f build/script.js
           echo "All tests passed successfully."
 
+
       - name: Package Application
         run: |
           echo "Packaging application..."
           cd build
           zip -r ../college-erp.zip .
 
+
       - name: Upload Package
         uses: actions/upload-artifact@v4
         with:
           name: college-erp-package
           path: college-erp.zip
+
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+
+  deploy:
+
+    needs: build-and-test
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
