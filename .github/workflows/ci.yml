@@ -1,0 +1,56 @@
+name: College ERP CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Project Files
+        run: |
+          echo "Checking College ERP files..."
+          test -f index.html
+          test -f style.css
+          test -f script.js
+
+      - name: Build Application
+        run: |
+          echo "Building College ERP application..."
+          mkdir build
+          cp index.html build/
+          cp style.css build/
+          cp script.js build/
+
+      - name: Test Application
+        run: |
+          echo "Running tests..."
+          test -f build/index.html
+          test -f build/style.css
+          test -f build/script.js
+          echo "All tests passed successfully."
+
+      - name: Package Application
+        run: |
+          echo "Packaging application..."
+          cd build
+          zip -r ../college-erp.zip .
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: college-erp-package
+          path: college-erp.zip
